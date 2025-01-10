@@ -18,9 +18,45 @@ MonoBehaviour:
     GameObject: {fileID: 0}
     From: 0
     NameToFullName: []
-    BindInfos: []
-    ScriptsFolder: "Assets/10.\u6E38\u620F\u7CFB\u7EDF/\u901A\u7528\u80CC\u5305\u7CFB\u7EDF/Test/MVC"
-    ClassName: InventoryExample1
+    BindInfos:
+    - TypeName: UnityEngine.RectTransform
+      PathToRoot: UISlotRoot
+      MemberName: UISlotRoot
+    - TypeName: QFramework.UISlot
+      PathToRoot: UISlot
+      MemberName: UISlot
+    - TypeName: UnityEngine.UI.Button
+      PathToRoot: BtnAddItem1
+      MemberName: BtnAddItem1
+    - TypeName: UnityEngine.UI.Button
+      PathToRoot: BtnSubItem1
+      MemberName: BtnSubItem1
+    - TypeName: UnityEngine.UI.Button
+      PathToRoot: BtnSubItem2
+      MemberName: BtnSubItem2
+    - TypeName: UnityEngine.UI.Button
+      PathToRoot: BtnSubItem3
+      MemberName: BtnSubItem3
+    - TypeName: UnityEngine.UI.Button
+      PathToRoot: BtnSubItem4
+      MemberName: BtnSubItem4
+    - TypeName: UnityEngine.UI.Button
+      PathToRoot: BtnSubItem5
+      MemberName: BtnSubItem5
+    - TypeName: UnityEngine.UI.Button
+      PathToRoot: BtnAddItem2
+      MemberName: BtnAddItem2
+    - TypeName: UnityEngine.UI.Button
+      PathToRoot: BtnAddItem3
+      MemberName: BtnAddItem3
+    - TypeName: UnityEngine.UI.Button
+      PathToRoot: BtnAddItem4
+      MemberName: BtnAddItem4
+    - TypeName: UnityEngine.UI.Button
+      PathToRoot: BtnAddItem5
+      MemberName: BtnAddItem5
+    ScriptsFolder: "Assets/10.\u6E38\u620F\u7CFB\u7EDF/\u901A\u7528\u80CC\u5305\u7CFB\u7EDF/ItemKit/Examples/1.UGUIInventoryExample"
+    ClassName: UGUIInventoryExample
     Namespace: QFramework.Example
     MainCode: 
     DesignerCode: 
