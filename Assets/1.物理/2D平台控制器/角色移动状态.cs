@@ -30,16 +30,22 @@ public class 角色移动状态 : ScriptableObject
     public float 跳跃高度 = 6.5f;
     [Range(1f, 1.1f)] public float 跳跃高度补偿因子 = 1.054f; // 跳跃高度的补偿，用于调整跳跃高度
     public float 达顶时间 = 0.35f; // 到达最高点的时间
-    [Range(0.01f, 5f)] public float 跳跃释放重力倍率 = 2f; // 跳跃瞬间的重力倍率
+    [Tooltip("这是对重力的修正因子")]
+    [Range(0f, 5f)] public float 跳跃释放重力倍率 = 1f; // 这是对重力的修正因子
     public float 最大下落速度 = 26f;
     public int 最大跳跃次数 = 2;
 
     [Header("跳跃行为细节")]
-    [Range(0.02f, 0.3f)] public float 跳跃取消窗口 = 0.027f; // 玩家在跳跃过程中松开跳跃键，会在一个短时间窗口内取消向上运动
+    [Tooltip("玩家在跳跃过程中松开跳跃键，会在一个短时间窗口内取消向上运动")]
+    [Range(0f, 0.3f)] public float 跳跃取消窗口 = 0.027f;
+    [Tooltip("达到最高点要求的百分之多少就算达到最高点")]
     [Range(0.5f, 1f)] public float 最高点阈值 = 0.97f;
+    [Tooltip("达到最高点后停留的时间")]
     [Range(0.01f, 1f)] public float 最高点停留时间 = 0.075f;
 
+    [Tooltip("当玩家落地前按下跳跃键，跳跃指令会存储一段时间，等玩家落地后再执行跳跃")]
     [Range(0f, 1f)] public float 跳跃缓冲时间 = 0.125f;
+    [Tooltip("当玩家从地面转移到空中，会允许一段时间内执行跳跃指令，这就是Coyote Jump")]
     [Range(0f, 1f)] public float 悬空跳跃缓冲时间 = 0.1f;
 
 

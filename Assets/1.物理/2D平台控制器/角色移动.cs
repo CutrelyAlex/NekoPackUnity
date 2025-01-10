@@ -1,3 +1,5 @@
+using System;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 /// <summary>
@@ -35,18 +37,18 @@ public class NewBehaviourScript : MonoBehaviour
     private bool _isFacingRight;
 
     // 碰撞检测
-    private RaycastHit2D _地射线;
-    private RaycastHit2D _顶射线;
-    private bool _是否触地;
-    private bool _是否触顶;
+    private RaycastHit2D _groundHit;
+    private RaycastHit2D _headHit;
+    private bool _isGrounded;
+    private bool _isBumpedHead;
 
     // 跳跃
-    public float 竖直速度 { get; private set; }
-    private bool _跳跃中;
-    private bool _快速下落;
-    private bool _下落中;
-    private float _快速下落时间;
-    private float _快速下落初始速度;
+    public float VetricalSpeed { get; private set; }
+    private bool _jumping;
+    private bool _fastFalling;
+    private bool _falling;
+    private float _fastFallingTime;
+    private float _fastFallingSpeed;
     private int _已跳跃次数;
 
     // 最高点变量
@@ -73,11 +75,12 @@ public class NewBehaviourScript : MonoBehaviour
         JumpCheck();
     }
 
+
     private void FixedUpdate()
     {
         CollisionCheck();
         Jump();
-        if (_是否触地)
+        if (_isGrounded)
         {
             Move(移动状态.地面加速度, 移动状态.地面减速度, InputManager.Movement);
         }
@@ -144,170 +147,201 @@ public class NewBehaviourScript : MonoBehaviour
     #region 跳跃
     private void JumpCheck()
     {
-        // 按下
+        /// 按下跳跃键
         if (InputManager.JumpWasPressed)
         {
-            _跳跃缓冲计时器 = 移动状态.跳跃缓冲时间;
-            _跳跃缓冲期间释放跳跃键 = false;
+            _跳跃缓冲计时器 = 移动状态.跳跃缓冲时间; // 重置跳跃缓冲计时器
+            _跳跃缓冲期间释放跳跃键 = false; // 标记未释放跳跃键
         }
-        // 释放
+        // 释放跳跃键
         if (InputManager.JumpWasReleased)
         {
+            // 如果在跳跃缓冲期间释放了跳跃键
             if (_跳跃缓冲计时器 > 0)
             {
                 _跳跃缓冲期间释放跳跃键 = true;
             }
-            if (_跳跃中 && 竖直速度 > 0)
+            // 在跳跃过程中释放跳跃键
+            if (_jumping && VetricalSpeed > 0)
             {
                 if (_是否超过最高点阈值)
                 {
+                    // 取消最高点的状态，启动快速下落
                     _是否超过最高点阈值 = false;
-                    _快速下落 = true;
-                    _快速下落时间 = 移动状态.跳跃取消窗口;
-                    竖直速度 = 0f;
+                    _fastFalling = true;
+                    _fastFallingTime = 移动状态.跳跃取消窗口; // 快速下落窗口时间
+                    VetricalSpeed = 0f;
                 }
                 else
                 {
-                    _快速下落 = true;
-                    _快速下落初始速度 = 竖直速度;
+                    // 直接启动快速下落
+                    _fastFalling = true;
+                    _fastFallingSpeed = VetricalSpeed;
                 }
 
             }
         }
-        // 初始化跳跃
-        if (_跳跃缓冲计时器 > 0f && !_跳跃中 && (_是否触地 || _悬空跳跃计时器 > 0))
-        {
-            InitiateJump(1);
 
+        // 初始化跳跃
+        if (_跳跃缓冲计时器 > 0f && !_jumping && (_isGrounded || _悬空跳跃计时器 > 0))
+        {
+            InitiateJump(1); // 执行第一次跳跃
+
+            // 如果在跳跃缓冲期间释放了跳跃键，立即触发快速下落
             if (_跳跃缓冲期间释放跳跃键)
             {
-                _快速下落 = true;
-                _快速下落初始速度 = 竖直速度;
+                _fastFalling = true;
+                _fastFallingSpeed = VetricalSpeed;
             }
         }
+
         // 多级跳跃
-        else if (_跳跃缓冲计时器 > 0f && _跳跃中 && _已跳跃次数 < 移动状态.最大跳跃次数)
+        else if (_跳跃缓冲计时器 > 0f && _jumping && _已跳跃次数 < 移动状态.最大跳跃次数)
         {
-            _快速下落 = false;
-            InitiateJump(1);
+            _fastFalling = false; // 禁用快速下落状态
+            InitiateJump(1); // 执行多级跳跃
         }
-        // 空中跳跃
-        else if (_跳跃缓冲计时器 > 0f && _下落中 && _已跳跃次数 < 移动状态.最大跳跃次数 - 1)
+        // 空中跳跃，即玩家从地面非跳跃自然转移到空中后，再次按下跳跃键
+        else if (_跳跃缓冲计时器 > 0f && _falling && _已跳跃次数 < 移动状态.最大跳跃次数 - 1)
         {
-            InitiateJump(2);
-            _快速下落 = false;
+            InitiateJump(2); // 执行空中跳跃，要用掉2次跳跃次数
+            _fastFalling = false; // 禁用快速下落状态
         }
         // 着陆检测
-        if ((_跳跃中 || _下落中) && _是否触地 && 竖直速度 <= 0f)
+        if ((_jumping || _falling) && _isGrounded && VetricalSpeed <= 0f)
         {
-            _跳跃中 = false;
-            _下落中 = false;
-            _快速下落 = false;
-            _快速下落时间 = 0f;
+            _jumping = false;
+            _falling = false;
+            _fastFalling = false;
+            _fastFallingTime = 0f;
             _是否超过最高点阈值 = false;
             _已跳跃次数 = 0;
-
-            竖直速度 = Physics2D.gravity.y;
+            // 将垂直速度设置为默认重力值
+            VetricalSpeed = Physics2D.gravity.y;
 
         }
     }
 
     private void InitiateJump(int 已用跳跃次数)
     {
-        if (!_跳跃中)
+        if (!_jumping)
         {
-            _跳跃中 = true;
+            _jumping = true;
         }
         _跳跃缓冲计时器 = 0f;
         _已跳跃次数 += 已用跳跃次数;
-        竖直速度 = 移动状态.初始跳跃速度;
+        VetricalSpeed = 移动状态.初始跳跃速度;
     }
 
     private void Jump()
     {
         // 应用重力
-        if (_跳跃中)
+        if (_jumping)
         {
             // 检查触顶
-            if (_是否触顶)
+            if (_isBumpedHead)
             {
-                _快速下落 = true;
+                _fastFalling = true;
             }
-            // 上升重力
-            if (竖直速度 >= 0f)
+
+            // 处理上升阶段的重力逻辑
+            if (VetricalSpeed >= 0f)
             {
-                // 最高点控制
-                _最高点进度 = Mathf.InverseLerp(移动状态.初始跳跃速度, 0f, 竖直速度);
+                // 计算跳跃的最高点进度
+                _最高点进度 = Mathf.InverseLerp(移动状态.初始跳跃速度, 0f, VetricalSpeed);
+                // 判断是否超过最高点阈值
                 if (_最高点进度 > 移动状态.最高点阈值)
                 {
-                    if (!_是否超过最高点阈值)
-                    {
-                        _是否超过最高点阈值 = true;
-                        _超过最高点阈值时间 = 0f;
-                    }
-
-                    if (_是否超过最高点阈值)
-                    {
-                        _超过最高点阈值时间 += Time.fixedDeltaTime;
-                        if (_超过最高点阈值时间 < 移动状态.最高点停留时间)
-                        {
-                            竖直速度 = 0f;
-                        }
-                        else
-                        {
-                            竖直速度 = -0.01f;
-                        }
-                    }
+                    处理超过最高点阈值();
                 }
                 else
                 {
-                    竖直速度 += 移动状态.重力加速度 * Time.fixedDeltaTime;
-                    if (_是否超过最高点阈值)
-                    {
-                        _是否超过最高点阈值 = false;
-                    } 
+                    // 正常上升逻辑，应用重力加速度
+                    VetricalSpeed += 移动状态.重力加速度 * Time.fixedDeltaTime;
+                    重置最高点阈值判断();
                 }
             }
-            else if (!_快速下落)
+            // 处理跳跃释放后的快速下落逻辑
+            else if (!_fastFalling)
             {
-                竖直速度 += 移动状态.重力加速度 * 移动状态.跳跃释放重力倍率 * Time.fixedDeltaTime;
+                VetricalSpeed += 移动状态.重力加速度 * 移动状态.跳跃释放重力倍率 * Time.fixedDeltaTime;
             }
-            else if (竖直速度 < 0f)
+            // 处理进入下落状态的标记
+            else if (VetricalSpeed < 0f)
             {
-                if (!_下落中)
-                {
-                    _下落中 = true;
-                }
+                SetFallingState();
             }
         }
+
         // 跳跃取消
-        if(_快速下落)
+        if (_fastFalling)
         {
-            if(_快速下落时间 >= 移动状态.跳跃取消窗口)
-            {
-                竖直速度 += 移动状态.重力加速度 * 移动状态.跳跃释放重力倍率 * Time.fixedDeltaTime;
-            }
-            else if (_快速下落时间 <= 移动状态.跳跃取消窗口)
-            {
-                竖直速度 = Mathf.Lerp(_快速下落初始速度, 0f, (_快速下落时间/ 移动状态.跳跃取消窗口));
-            }
-            _快速下落时间 += Time.fixedDeltaTime;
+            处理快速下落();
         }
-        // 正常下落(掉落)
-        if(!_是否触地 && !_跳跃中)
+
+        // 正常下落逻辑（非跳跃状态且未接触地面）
+        if (!_isGrounded && !_jumping)
         {
-            if (!_下落中)
-            {
-                _下落中 = true;
-            }
+            SetFallingState();
 
-            竖直速度 += 移动状态.重力加速度 * Time.fixedDeltaTime;
+            // 应用正常重力加速度
+            VetricalSpeed += 移动状态.重力加速度 * Time.fixedDeltaTime;
         }
-        // Clamp
+        // 限制垂直速度范围
+        VetricalSpeed = Mathf.Clamp(VetricalSpeed, -移动状态.最大下落速度, 50f);
+        // 更新刚体速度
+        _rb.velocity = new Vector2(_rb.velocity.x, VetricalSpeed);
+    }
 
-        竖直速度 = Mathf.Clamp(竖直速度, -移动状态.最大下落速度, 50f);
+    private void SetFallingState()
+    {
+        if (!_falling)
+        {
+            _falling = true;
+        }
+    }
 
-        _rb.velocity = new Vector2(_rb.velocity.x, 竖直速度);
+    private void 处理快速下落()
+    {
+        if (_fastFallingTime >= 移动状态.跳跃取消窗口)
+        {
+            VetricalSpeed += 移动状态.重力加速度 * 移动状态.跳跃释放重力倍率 * Time.fixedDeltaTime;
+        }
+        else if (_fastFallingTime <= 移动状态.跳跃取消窗口)
+        {
+            VetricalSpeed = Mathf.Lerp(_fastFallingSpeed, 0f, (_fastFallingTime / 移动状态.跳跃取消窗口));
+        }
+        _fastFallingTime += Time.fixedDeltaTime;
+    }
+
+    private void 重置最高点阈值判断()
+    {
+        if (_是否超过最高点阈值)
+        {
+            _是否超过最高点阈值 = false;
+        }
+    }
+
+    private void 处理超过最高点阈值()
+    {
+        if (!_是否超过最高点阈值)
+        {
+            _是否超过最高点阈值 = true;
+            _超过最高点阈值时间 = 0f;
+        }
+
+        if (_是否超过最高点阈值)
+        {
+            _超过最高点阈值时间 += Time.fixedDeltaTime;
+            if (_超过最高点阈值时间 < 移动状态.最高点停留时间)
+            {
+                VetricalSpeed = 0f;
+            }
+            else
+            {
+                VetricalSpeed = -0.01f;
+            }
+        }
     }
     #endregion
 
@@ -317,34 +351,11 @@ public class NewBehaviourScript : MonoBehaviour
         Vector2 boxCastOrigin = new Vector2(_feetColl.bounds.center.x, _feetColl.bounds.min.y);
         Vector2 boxCastSize = new Vector2(_feetColl.bounds.size.x, 移动状态.地面射线长度);
 
-        _地射线 = Physics2D.BoxCast(boxCastOrigin, boxCastSize, 0f, Vector2.down, 移动状态.地面射线长度, 移动状态.地面层);
-        if (_地射线.collider != null)
-        {
-            _是否触地 = true;
-        }
-        else
-        {
-            _是否触地 = false;
-        }
+        _groundHit = Physics2D.BoxCast(boxCastOrigin, boxCastSize, 0f, Vector2.down, 移动状态.地面射线长度, 移动状态.地面层);
 
-        #region Debug地面检测
-        if (移动状态.Debug地面碰撞箱)
-        {
+        _isGrounded = _groundHit.collider != null;
 
-            Color rayColor;
-            if (_是否触地)
-            {
-                rayColor = Color.green;
-            }
-            else
-            {
-                rayColor = Color.red;
-            }
-            Debug.DrawRay(new Vector2(boxCastOrigin.x - boxCastOrigin.x / 2, boxCastOrigin.y), Vector2.down * 移动状态.地面射线长度, rayColor);
-            Debug.DrawRay(new Vector2(boxCastOrigin.x + boxCastOrigin.x / 2, boxCastOrigin.y), Vector2.down * 移动状态.地面射线长度, rayColor);
-            Debug.DrawRay(new Vector2(boxCastOrigin.x - boxCastOrigin.x / 2, boxCastOrigin.y - 移动状态.地面射线长度), Vector2.right * boxCastSize.x, rayColor);
-        }
-        #endregion
+        DebugUIDrawer(boxCastOrigin, boxCastSize);
     }
 
     private void BumpedHead()
@@ -352,37 +363,11 @@ public class NewBehaviourScript : MonoBehaviour
         Vector2 boxCastOrigin = new Vector2(_feetColl.bounds.center.x, _feetColl.bounds.max.y);
         Vector2 boxCastSize = new Vector2(_feetColl.bounds.size.x * 移动状态.顶部宽度, 移动状态.顶部射线长度);
 
-        _顶射线 = Physics2D.BoxCast(boxCastOrigin, boxCastSize, 0f, Vector2.up, 移动状态.顶部射线长度, 移动状态.地面层);
-        if(_顶射线.collider != null)
-        {
-            _是否触顶 = true;
-        }
-        else
-        {
-            _是否触顶 = false;
-        }
+        _headHit = Physics2D.BoxCast(boxCastOrigin, boxCastSize, 0f, Vector2.up, 移动状态.顶部射线长度, 移动状态.地面层);
 
-        #region Debug
-        if(移动状态.Debug头部碰撞箱)
-        {
-            float headWidth = 移动状态.顶部宽度;
-             Color rayColor;
-            if (_是否触地)
-            {
-                rayColor = Color.green;
-            }
-            else
-            {
-                rayColor = Color.red;
-            }
-            Debug.DrawRay(new Vector2(boxCastOrigin.x - boxCastOrigin.x / 2, boxCastOrigin.y),
-                Vector2.up * 移动状态.顶部射线长度, rayColor);
-            Debug.DrawRay(new Vector2(boxCastOrigin.x + boxCastOrigin.x / 2, boxCastOrigin.y), 
-                Vector2.up * 移动状态.顶部射线长度, rayColor);
-            Debug.DrawRay(new Vector2(boxCastOrigin.x - boxCastOrigin.x / 2, boxCastOrigin.y - 移动状态.顶部射线长度), 
-                Vector2.right * boxCastSize.x * headWidth, rayColor);
-        }
-        #endregion
+        _isBumpedHead = _headHit.collider != null;
+
+        DebugUIDrawer(boxCastOrigin, boxCastSize);
     }
     private void CollisionCheck()
     {
@@ -395,7 +380,7 @@ public class NewBehaviourScript : MonoBehaviour
     private void CountTimer()
     {
         _跳跃缓冲计时器 -= Time.deltaTime;
-        if (!_是否触地)
+        if (!_isGrounded)
         {
             _悬空跳跃计时器 -= Time.deltaTime;
         }
@@ -404,5 +389,48 @@ public class NewBehaviourScript : MonoBehaviour
             _悬空跳跃计时器 = 移动状态.悬空跳跃缓冲时间;
         }
     }
+    #endregion
+
+    #region DebugUI
+    private void DebugUIDrawer(Vector2 boxCastOrigin, Vector2 boxCastSize)
+    {
+        if (移动状态.Debug头部碰撞箱)
+        {
+            float headWidth = 移动状态.顶部宽度;
+            Color rayColor;
+            if (_isGrounded)
+            {
+                rayColor = Color.green;
+            }
+            else
+            {
+                rayColor = Color.red;
+            }
+            Debug.DrawRay(new Vector2(boxCastOrigin.x - boxCastOrigin.x / 2, boxCastOrigin.y),
+                Vector2.up * 移动状态.顶部射线长度, rayColor);
+            Debug.DrawRay(new Vector2(boxCastOrigin.x + boxCastOrigin.x / 2, boxCastOrigin.y),
+                Vector2.up * 移动状态.顶部射线长度, rayColor);
+            Debug.DrawRay(new Vector2(boxCastOrigin.x - boxCastOrigin.x / 2, boxCastOrigin.y - 移动状态.顶部射线长度),
+                Vector2.right * boxCastSize.x * headWidth, rayColor);
+        }
+
+
+        if (移动状态.Debug地面碰撞箱)
+        {
+            Color rayColor = _isGrounded ? Color.green : Color.red;
+
+            // 绘制BoxCast的四条边
+            Vector2 topLeft = new Vector2(boxCastOrigin.x - boxCastSize.x / 2, boxCastOrigin.y + boxCastSize.y / 2);
+            Vector2 topRight = new Vector2(boxCastOrigin.x + boxCastSize.x / 2, boxCastOrigin.y + boxCastSize.y / 2);
+            Vector2 bottomLeft = new Vector2(boxCastOrigin.x - boxCastSize.x / 2, boxCastOrigin.y - boxCastSize.y / 2);
+            Vector2 bottomRight = new Vector2(boxCastOrigin.x + boxCastSize.x / 2, boxCastOrigin.y - boxCastSize.y / 2);
+
+            Debug.DrawLine(topLeft, topRight, rayColor);
+            Debug.DrawLine(topRight, bottomRight, rayColor);
+            Debug.DrawLine(bottomRight, bottomLeft, rayColor);
+            Debug.DrawLine(bottomLeft, topLeft, rayColor);
+        }
+    }
+
     #endregion
 }
