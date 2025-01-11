@@ -37,7 +37,8 @@ namespace QFramework
         {
             var mousePos = Input.mousePosition;
             // 将屏幕坐标转换为本地坐标, 以便于计算拖拽的位置
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(transform as RectTransform, mousePos, null,
+            UGUIInventoryExample controller = FindAnyObjectByType<UGUIInventoryExample>();
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(controller.transform as RectTransform, mousePos, null,
                                                                         out Vector2 localPos))
             {
                 Name.LocalPosition2D(localPos); // 设置物品名字的位置
@@ -46,8 +47,11 @@ namespace QFramework
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (mDragging) return;
+            if (mDragging || Data.Count == 0) return;
             mDragging = true;
+
+            UGUIInventoryExample controller= FindAnyObjectByType<UGUIInventoryExample>();
+            Name.Parent(controller);
             SyncItemToMousePos(); // 同步物品到鼠标位置
         }
 
@@ -63,18 +67,32 @@ namespace QFramework
         {
             if (mDragging)
             {
+                Name.Parent(transform); // 恢复物品名字的父节点
                 Name.LocalPositionIdentity(); // 恢复物品名字的位置
 
                 bool throwItem = true;
 
                 // 检测是否在任意UISlot上
                 UISlot[] uiSlots = transform.parent.GetComponentsInChildren<UISlot>();
-                foreach (UISlot slot in uiSlots)
+                foreach (UISlot uiSlot in uiSlots)
                 {
-                    RectTransform recTransform = slot.transform as RectTransform;
+                    RectTransform recTransform = uiSlot.transform as RectTransform;
                     if (RectTransformUtility.RectangleContainsScreenPoint(recTransform, Input.mousePosition))
                     {
                         throwItem = false;
+                        // 交换物品
+                        if(Data.Count != 0)
+                        {
+                            var cachedItem = uiSlot.Data.Item;
+                            var cachedCount = uiSlot.Data.Count;
+                            uiSlot.Data.Item = Data.Item;
+                            uiSlot.Data.Count = Data.Count;
+                            Data.Item = cachedItem;
+                            Data.Count = cachedCount;
+                            FindAnyObjectByType<UGUIInventoryExample>().Refresh();
+                        }
+
+                        break;
                     };
                 }
 
