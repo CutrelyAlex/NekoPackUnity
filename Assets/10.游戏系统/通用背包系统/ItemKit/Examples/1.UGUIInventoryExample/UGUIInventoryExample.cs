@@ -69,31 +69,14 @@ namespace QFramework.Example
             });
         }
 
-        void Refresh()
+        public void Refresh()
         {
             UISlotRoot.DestroyChildren();
             foreach (var slot in ItemKit.Slots)
             {
-                UISlot uiSlotInstance = UISlot.InstantiateWithParent(UISlotRoot);
-                if (uiSlotInstance == null)
-                {
-                    Debug.LogError("UISlot.InstantiateWithParent(UISlotRoot) return null.");
-                    return;
-                }
-                uiSlotInstance.Self(self =>
-                {
-                    if (slot.Count == 0)
-                    {
-                        self.Name.text = "Пе";
-                        self.Count.text = "";
-                    }
-                    else
-                    {
-                        self.Name.text = slot.Item.Name;
-                        self.Count.text = slot.Count.ToString();
-
-                    }
-                }).Show();
+                UISlot uiSlotInstance = UISlot.InstantiateWithParent(UISlotRoot)
+                                              .InitWithData(slot)
+                                              .Show();
             }
         }
 

@@ -2172,6 +2172,11 @@ MonoBehaviour:
   UISlotRoot: {fileID: 1240309679}
   UISlot: {fileID: 1160635551}
   BtnAddItem1: {fileID: 1989796430}
+  BtnSubItem1: {fileID: 2119827767}
+  BtnSubItem2: {fileID: 1971936495}
+  BtnSubItem3: {fileID: 778033178}
+  BtnSubItem4: {fileID: 1013494056}
+  BtnSubItem5: {fileID: 846071974}
   BtnAddItem2: {fileID: 689994917}
   BtnAddItem3: {fileID: 1641432731}
   BtnAddItem4: {fileID: 1251620333}

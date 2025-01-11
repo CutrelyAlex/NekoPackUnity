@@ -65,18 +65,15 @@ namespace QFramework
             return true;
         }
 
-        public static bool SubItem(string itemKey, int addCount = 1)
+        public static bool SubItem(string itemKey, int subCount = 1)
         {
             var slot = FindSlotByKey(itemKey);
-            if (slot != null)
+            if (slot != null && slot.Count - subCount >= 0)
             {
-                slot.Count -= addCount;
+                slot.Count -= subCount;
+                return true;
             }
-            else
-            {
-                return false;
-            }
-            return true;
+            return false;
         }
     }
 }
