@@ -1,6 +1,16 @@
+using UnityEngine;
+
 namespace QFramework
 {
-    public class Item
+    public interface IItem
+    {
+        public string GetKey { get; }
+        public string GetName { get; }
+        public Sprite GetIcon { get; }
+
+    }
+
+    public class Item : IItem
     {
         public string Key;
         public string Name;
@@ -10,5 +20,11 @@ namespace QFramework
             Key = key;
             Name = name;
         }
+
+        public string GetKey => Key;
+
+        public string GetName => Name;
+
+        public Sprite GetIcon => null;
     }
 }

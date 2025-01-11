@@ -7,7 +7,7 @@ using UnityEngine;
 /// 可移植到qframework框架中进行全局管理
 /// </summary>
 
-[CreateAssetMenu(menuName = "物理/2D平台角色移动")]
+[CreateAssetMenu(menuName = "@Physics/2D平台角色移动")]
 public class 角色移动状态 : ScriptableObject
 {
     [Header("走")]

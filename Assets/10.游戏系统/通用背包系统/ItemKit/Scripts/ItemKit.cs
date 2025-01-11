@@ -44,7 +44,7 @@ namespace QFramework
         /// <returns>找到的Slot，如果没有找到则返回null</returns>
         public static Slot FindSlotByKey(string itemKey)
         {
-            return ItemKit.Slots.Find(s => s.Item != null && s.Item.Key == itemKey && s.Count != 0);
+            return ItemKit.Slots.Find(s => s.Item != null && s.Item.GetKey == itemKey && s.Count != 0);
         }
 
         /// <summary>

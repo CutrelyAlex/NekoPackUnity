@@ -1,6 +1,4 @@
 using QFramework.Example;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,7 +8,7 @@ namespace QFramework
 
     public class UISlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        public Text Name;
+        public Image Icon;
         public Text Count;
 
         public Slot Data { get; set; }
@@ -22,12 +20,12 @@ namespace QFramework
             Data = data;
             if (Data.Count == 0)
             {
-                Name.text = "空";
+                Icon.Hide();
                 Count.text = "";
             }
             else
             {
-                Name.text = Data.Item.Name;
+                Icon.Show();
                 Count.text = Data.Count.ToString();
             }
             return this;
@@ -41,7 +39,7 @@ namespace QFramework
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(controller.transform as RectTransform, mousePos, null,
                                                                         out Vector2 localPos))
             {
-                Name.LocalPosition2D(localPos); // 设置物品名字的位置
+                Icon.LocalPosition2D(localPos); // 设置物品名字的位置
             }
         }
 
@@ -50,8 +48,8 @@ namespace QFramework
             if (mDragging || Data.Count == 0) return;
             mDragging = true;
 
-            UGUIInventoryExample controller= FindAnyObjectByType<UGUIInventoryExample>();
-            Name.Parent(controller);
+            UGUIInventoryExample controller = FindAnyObjectByType<UGUIInventoryExample>();
+            Icon.Parent(controller);
             SyncItemToMousePos(); // 同步物品到鼠标位置
         }
 
@@ -67,8 +65,8 @@ namespace QFramework
         {
             if (mDragging)
             {
-                Name.Parent(transform); // 恢复物品名字的父节点
-                Name.LocalPositionIdentity(); // 恢复物品名字的位置
+                Icon.Parent(transform); // 恢复物品名字的父节点
+                Icon.LocalPositionIdentity(); // 恢复物品名字的位置
 
                 bool throwItem = true;
 
@@ -81,7 +79,7 @@ namespace QFramework
                     {
                         throwItem = false;
                         // 交换物品
-                        if(Data.Count != 0)
+                        if (Data.Count != 0)
                         {
                             var cachedItem = uiSlot.Data.Item;
                             var cachedCount = uiSlot.Data.Count;
@@ -96,7 +94,7 @@ namespace QFramework
                     };
                 }
 
-                if(throwItem)
+                if (throwItem)
                 {
                     Data.Item = null;
                     Data.Count = 0;

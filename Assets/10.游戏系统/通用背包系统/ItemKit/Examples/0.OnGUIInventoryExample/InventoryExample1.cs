@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using UnityEngine;
-using static QFramework.Example.InventoryExample1;
 
 namespace QFramework.Example
 {
@@ -19,7 +17,7 @@ namespace QFramework.Example
                 }
                 else
                 {
-                    GUILayout.Label($"格子: {slot.Item.Name} 数量:{slot.Count}");
+                    GUILayout.Label($"格子: {slot.Item.GetName} 数量:{slot.Count}");
                 }
                 GUILayout.EndHorizontal();
             }
@@ -28,7 +26,7 @@ namespace QFramework.Example
             GUILayout.Label("物品1");
             if (GUILayout.Button("+"))
             {
-                if(!ItemKit.AddItem("item_1"))
+                if (!ItemKit.AddItem("item_1"))
                 {
                     Debug.Log("背包已满");
                 }
@@ -36,7 +34,7 @@ namespace QFramework.Example
 
             if (GUILayout.Button("-"))
             {
-                if(!ItemKit.SubItem("item_1"))
+                if (!ItemKit.SubItem("item_1"))
                 {
                     Debug.Log("背包没有该物品");
                 }

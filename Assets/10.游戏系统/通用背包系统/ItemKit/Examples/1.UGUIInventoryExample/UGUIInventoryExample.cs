@@ -1,10 +1,9 @@
 using UnityEngine;
-using QFramework;
 
 namespace QFramework.Example
 {
-	public partial class UGUIInventoryExample : ViewController
-	{
+    public partial class UGUIInventoryExample : ViewController
+    {
         private void Start()
         {
             if (UISlotRoot == null)
