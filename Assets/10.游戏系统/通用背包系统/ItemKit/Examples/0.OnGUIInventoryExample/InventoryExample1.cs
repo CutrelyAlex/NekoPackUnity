@@ -4,6 +4,14 @@ namespace QFramework.Example
 {
     public partial class InventoryExample1 : ViewController
     {
+        private void Awake()
+        {
+            ItemKit.AddItemConfig(ConfigManager.Iron.Value);
+            ItemKit.AddItemConfig(ConfigManager.Powder.Value);
+
+            ItemKit.CreateSlot(ConfigManager.Iron.Value, 1);
+            ItemKit.CreateSlot(ConfigManager.Powder.Value, 15);
+        }
         private void OnGUI()
         {
             IMGUIHelper.SetDesignResolution(640, 360);
@@ -26,7 +34,7 @@ namespace QFramework.Example
             GUILayout.Label("物品1");
             if (GUILayout.Button("+"))
             {
-                if (!ItemKit.AddItem("item_1"))
+                if (!ItemKit.AddItem(ConfigManager.Iron.Value.GetKey))
                 {
                     Debug.Log("背包已满");
                 }
@@ -34,7 +42,7 @@ namespace QFramework.Example
 
             if (GUILayout.Button("-"))
             {
-                if (!ItemKit.SubItem("item_1"))
+                if (!ItemKit.SubItem(ConfigManager.Iron.Value.GetKey))
                 {
                     Debug.Log("背包没有该物品");
                 }
@@ -44,26 +52,8 @@ namespace QFramework.Example
 
             GUILayout.BeginHorizontal();
             GUILayout.Label("物品2");
-            if (GUILayout.Button("+")) ItemKit.AddItem("item_2");
-            if (GUILayout.Button("-")) ItemKit.SubItem("item_2");
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("物品3");
-            if (GUILayout.Button("+")) ItemKit.AddItem("item_3");
-            if (GUILayout.Button("-")) ItemKit.SubItem("item_3");
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("物品4");
-            if (GUILayout.Button("+")) ItemKit.AddItem("item_4");
-            if (GUILayout.Button("-")) ItemKit.SubItem("item_4");
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("物品5");
-            if (GUILayout.Button("+")) ItemKit.AddItem("item_5");
-            if (GUILayout.Button("-")) ItemKit.SubItem("item_5");
+            if (GUILayout.Button("+")) ItemKit.AddItem(ConfigManager.Powder.Value.GetKey);
+            if (GUILayout.Button("-")) ItemKit.SubItem(ConfigManager.Powder.Value.GetKey);
             GUILayout.EndHorizontal();
         }
     }

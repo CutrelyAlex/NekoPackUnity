@@ -82,8 +82,8 @@ namespace QFramework
 
                 bool throwItem = true;
 
-                // 检测是否在任意UISlot上
-                UISlot[] uiSlots = transform.parent.GetComponentsInChildren<UISlot>();
+                // 检查是否拖拽到了其他物品槽上
+                UISlot[] uiSlots = transform.parent.GetComponentsInChildren<UISlot>(); // 获取所有的物品槽
                 foreach (UISlot uiSlot in uiSlots)
                 {
                     RectTransform recTransform = uiSlot.transform as RectTransform;

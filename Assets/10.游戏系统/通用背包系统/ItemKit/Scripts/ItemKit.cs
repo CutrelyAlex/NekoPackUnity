@@ -1,41 +1,42 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace QFramework
 {
-
-    /// <summary>
-    /// ItemKit管理物品的增删查改
-    /// 提供以下API:
-    /// - FindSlotByKey: 根据物品Key查找对应的Slot
-    /// - FindEmptySlot: 查找一个空的Slot
-    /// - FindAddableSlot: 查找一个可以添加物品的Slot
-    /// - AddItem: 添加物品到背包
-    /// - SubItem: 从背包中减少物品
-    /// </summary>
     public class ItemKit
     {
-        public static Item Item3 = new Item("item_3", "物品3");
-        public static Item Item4 = new Item("item_4", "物品4");
-        public static Item Item5 = new Item("item_5", "物品5");
+        // 所有的Slot
+        public static List<Slot> Slots = new List<Slot>();
+        // 所有的物品配置
+        public static Dictionary<string, IItem> ItemByKey = new Dictionary<string, IItem>();
 
-        public static List<Slot> Slots = new List<Slot>()
-            {
-                new Slot(null, 0),
-                new Slot(null, 0),
-                new Slot(ItemKit.Item3, 1),
-                new Slot(ItemKit.Item4, 1),
-            };
 
-        public static Dictionary<string, IItem> ItemByKey = new Dictionary<string, IItem>
-            {
-                {ItemKit.Item3.Key, ItemKit.Item3},
-                {ItemKit.Item4.Key, ItemKit.Item4},
-                {ItemKit.Item5.Key, ItemKit.Item5},
-            };
+        /// <summary>
+        /// 从Resources文件夹中加载物品配置
+        /// </summary>
+        /// <param name="itemName">物品名称</param>
+        public static void LoadItemConfigByResources(string itemName)
+        {
+            AddItemConfig(Resources.Load<ItemConfig>(itemName));
+        }
 
+        /// <summary>
+        /// 添加物品配置
+        /// </summary>
+        /// <param name="itemConfig">物品配置</param>
         public static void AddItemConfig(IItem itemConfig)
         {
             ItemByKey.Add(itemConfig.GetKey, itemConfig);
+        }
+
+        /// <summary>
+        /// 创建一个新的Slot
+        /// </summary>
+        /// <param name="item">物品</param>
+        /// <param name="count">物品数量</param>
+        public static void CreateSlot(IItem item, int count)
+        {
+            Slots.Add(new Slot(item, count));
         }
 
 
@@ -65,7 +66,7 @@ namespace QFramework
         /// <returns>找到的Slot，如果没有找到则返回null</returns>
         public static Slot FindAddableSlot(string itemKey)
         {
-            var slot = FindSlotByKey(itemKey);
+            Slot slot = FindSlotByKey(itemKey);
             if (slot == null)
             {
                 slot = FindEmptySlot();
@@ -85,7 +86,7 @@ namespace QFramework
         /// <returns>添加成功返回true，失败返回false</returns>
         public static bool AddItem(string itemKey, int addCount = 1)
         {
-            var slot = FindAddableSlot(itemKey);
+            Slot slot = FindAddableSlot(itemKey);
             if (slot != null)
             {
                 slot.Count += addCount;

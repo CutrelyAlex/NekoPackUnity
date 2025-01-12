@@ -1,12 +1,13 @@
-namespace QFramework
+
+
+using System;
+using UnityEngine;
+
+namespace QFramework.Example
 {
-    public partial class ConfigManager : ViewController, ISingleton
+    public class ConfigManager
     {
-
-        public static ConfigManager Default => MonoSingletonProperty<ConfigManager>.Instance; // 获取 ConfigManager 的单例实例
-
-        public void OnSingletonInit()
-        {
-        }
+        public static Lazy<IItem> Iron = new(() => Resources.Load<ItemConfig>("Iron"));
+        public static Lazy<IItem> Powder = new(() => Resources.Load<ItemConfig>("Powder"));
     }
 }
