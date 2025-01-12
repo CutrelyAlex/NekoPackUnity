@@ -6,6 +6,9 @@ using UnityEngine.UI;
 namespace QFramework
 {
 
+    /// <summary>
+    /// UISlot类用于处理UI背包系统中的物品槽。
+    /// </summary>
     public class UISlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         public Image Icon;
@@ -15,6 +18,11 @@ namespace QFramework
 
         private bool mDragging = false;
 
+        /// <summary>
+        /// 初始化物品槽数据。
+        /// </summary>
+        /// <param name="data">物品槽数据。</param>
+        /// <returns>返回初始化后的UISlot实例。</returns>
         public UISlot InitWithData(Slot data)
         {
             Data = data;
@@ -26,6 +34,10 @@ namespace QFramework
             else
             {
                 Icon.Show();
+                if (data.Item.GetIcon != null)
+                {
+                    Icon.sprite = data.Item.GetIcon;
+                }
                 Count.text = Data.Count.ToString();
             }
             return this;
@@ -83,10 +95,10 @@ namespace QFramework
                         {
                             var cachedItem = uiSlot.Data.Item;
                             var cachedCount = uiSlot.Data.Count;
-                            uiSlot.Data.Item = Data.Item;
-                            uiSlot.Data.Count = Data.Count;
-                            Data.Item = cachedItem;
-                            Data.Count = cachedCount;
+                            uiSlot.Data.Item = this.Data.Item;
+                            uiSlot.Data.Count = this.Data.Count;
+                            this.Data.Item = cachedItem;
+                            this.Data.Count = cachedCount;
                             FindAnyObjectByType<UGUIInventoryExample>().Refresh();
                         }
 

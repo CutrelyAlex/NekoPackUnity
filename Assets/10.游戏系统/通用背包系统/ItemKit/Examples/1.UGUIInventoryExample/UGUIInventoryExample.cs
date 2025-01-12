@@ -6,6 +6,14 @@ namespace QFramework.Example
     {
         private void Start()
         {
+            ItemKit.AddItemConfig(ConfigManager.Default.Iron);
+            ItemKit.AddItemConfig(ConfigManager.Default.Powder);
+
+            ItemKit.Slots[0].Item = ConfigManager.Default.Iron;
+            ItemKit.Slots[0].Count = 1;
+            ItemKit.Slots[1].Item = ConfigManager.Default.Powder;
+            ItemKit.Slots[1].Count = 15;
+
             if (UISlotRoot == null)
             {
                 Debug.LogError("UISlotRoot is not assigned.");
@@ -17,12 +25,12 @@ namespace QFramework.Example
 
             BtnAddItem1.onClick.AddListener(() =>
             {
-                ItemKit.AddItem(ItemKit.Item1.Key, 1);
+                ItemKit.AddItem(ConfigManager.Default.Iron.GetKey, 1);
                 Refresh();
             });
             BtnAddItem2.onClick.AddListener(() =>
             {
-                ItemKit.AddItem(ItemKit.Item2.Key, 1);
+                ItemKit.AddItem(ConfigManager.Default.Powder.GetKey, 1);
                 Refresh();
             });
             BtnAddItem3.onClick.AddListener(() =>
@@ -43,12 +51,12 @@ namespace QFramework.Example
 
             BtnSubItem1.onClick.AddListener(() =>
             {
-                ItemKit.SubItem(ItemKit.Item1.Key, 1);
+                ItemKit.SubItem(ConfigManager.Default.Iron.GetKey, 1);
                 Refresh();
             });
             BtnSubItem2.onClick.AddListener(() =>
             {
-                ItemKit.SubItem(ItemKit.Item2.Key, 1);
+                ItemKit.SubItem(ConfigManager.Default.Powder.GetKey, 1);
                 Refresh();
             });
             BtnSubItem3.onClick.AddListener(() =>
